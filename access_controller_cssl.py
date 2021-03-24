@@ -38,7 +38,6 @@ class Customer:
         self.processing_time = processing_time
 
     def cust_process(self, action):
-        # refer to global variables
         global free_servers
         global total_reward
 
@@ -70,23 +69,8 @@ for i in range(0, reps):
         action = get_random_action(state)
         state, reward, isdone, info = env.act(action)
         total_reward += reward
-    # env.close() # TODO MUTEX
 
     dur = time.time() - before
     total_dur += dur
 
 print('Average duration:', total_dur / reps, 'seconds. Average total reward: ', total_reward / reps)
-
-# Old
-
-# env = csslrl.make('access_controller', 'http://localhost:5000/api/RL')
-# state, isdone, info = env.reset2()
-# total_reward = 0
-# for i in range(0,6000):
-#     action = get_random_action(state)
-#     state, reward, isdone, info = env.act2(action)
-#     total_reward += reward
-
-# dur = time.time() - now
-# print('Duration:', dur)
-# print('Reward:', total_reward)

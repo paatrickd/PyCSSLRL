@@ -1,10 +1,7 @@
-import requests
 import numpy as np
-# import win32event
 import mmap
 from enum import Enum
 import json
-import time
 import os
 
 class Flag(Enum):
@@ -23,9 +20,6 @@ class rl_layer:
             self.mmf_action = mmap.mmap(fd.fileno(), 4)
         with open(os.path.join(path, 'flag'), 'r+') as fd:
             self.mmf_flag = mmap.mmap(fd.fileno(), 1)
-        # self.mmf_action = mmap.mmap(0, 4, 'action', mmap.ACCESS_WRITE)
-        # self.mmf_flag = mmap.mmap(0, 1, 'flag', mmap.ACCESS_WRITE)
-        # self.mmf_response = mmap.mmap(0, self.mmf_response_length, 'response', mmap.ACCESS_READ)
 
     def reset(self):
         self.set_flag(Flag.RESET)
@@ -69,55 +63,3 @@ class rl_layer:
         self.write_action(action)
         self.set_flag(Flag.ACT)
         return self.wait_for_response()
-
-    # Web api
-
-    def reset2(self):
-
-        res = requests.get(self.api + '/Reset')
-        data = res.json()
-
-        state = np.asarray(data['State'])
-        isdone = bool(data['IsEnded'])
-        if data['Info'] != None:
-            info = dict(data['Info'])
-        else:
-            info = None
-
-        return state, isdone, info
-
-    def act2(self, action: int):
-
-        # if (type(action) is not int):
-        #     raise TypeError(action)
-        
-        payload = {'action': action}
-
-        res = requests.post(self.api, params=payload)
-        data = res.json()
-
-        state = np.asarray(data['State'])
-        reward = float(data['Reward'])
-        isdone = bool(data['IsEnded'])
-        if data['Info'] != None:
-            info = dict(data['Info'])
-        else: 
-            info = None
-
-        return state, reward, isdone, info
-
-    def ping(self):
-
-        res = requests.get(self.api + '/Status')
-
-        return res.ok
-
-    def make(name: str, api_url: str):
-
-        if (type(name) is not str):
-            raise TypeError(name)
-        elif(type(api_url) is not str):
-            raise TypeError(api_url)
-
-        layer = rl_layer('cssl_rl_mutex', 'WINDOWS', api_url)
-        return layer
