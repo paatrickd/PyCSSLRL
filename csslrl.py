@@ -16,7 +16,7 @@ class rl_layer:
         Create the CSSL_RL environment
 
         Args:
-            response_length (int): The allocated bytes of state, done, info combined
+            response_length (int): The allocated bytes of state, reward, done, info combined
             path (str): The path where CSSL is executed 
         """
         self.path = path
