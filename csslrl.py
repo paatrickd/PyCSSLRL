@@ -11,9 +11,16 @@ class Flag(Enum):
 
 class rl_layer:
 
-    def __init__(self, path: str):
+    def __init__(self, path: str, response_length: int = 1000):
+        """
+        Create the CSSL_RL environment
+
+        Args:
+            response_length (int): The allocated bytes of state, done, info combined
+            path (str): The path where CSSL is executed 
+        """
         self.path = path
-        self.mmf_response_length = 1024
+        self.mmf_response_length = response_length
         with open(os.path.join(path, 'response')) as fd:
             self.mmf_response = mmap.mmap(fd.fileno(), self.mmf_response_length, access=mmap.ACCESS_READ)
         with open(os.path.join(path, 'action'), 'r+') as fd:
@@ -43,11 +50,9 @@ class rl_layer:
 
     def read_response(self):
         self.mmf_response.seek(0)
-        length = self.mmf_response.read_byte()
+        length = int.from_bytes(self.mmf_response.read(4), 'little')
         if length >= self.mmf_response_length:
-            self.mmf_response_length = length + 1
-            self.mmf_response = mmap.mmap(0, self.mmf_response_length, 'response', mmap.ACCESS_READ)
-            self.mmf_response.seek(1)
+            raise Exception(f"Response length is {length} bytes, but allocated memory is {self.mmf_response_length} bytes.")
         response_raw = self.mmf_response.read(length)
         response = json.loads(response_raw)
         state = np.asarray(response['State'])
